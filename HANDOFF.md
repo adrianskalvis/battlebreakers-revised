@@ -7,11 +7,13 @@
 2. No client files downloaded (see NOTES.md).
 3. Server starts against a real MongoDB 8.0.4 after generating the RSA key pair.
 
-4. `tests/smoke_test.py`: 29/29 checks pass (login, QueryProfile, InitializeLevel, FinalizeLevel).
+4. `tests/smoke_test.py`: 29/29 checks pass at step 4 (login, QueryProfile, InitializeLevel, FinalizeLevel).
+
+5. FALLBACK level generator behind `[levels] fallback-generator = "True"` in `utils/config.toml`. Smoke tests: 42/42.
 
 ## Next step
 
-5. Fallback rooms/rewards for levels without captured data, behind `[levels] fallback-generator` in `utils/config.toml`.
+6. `scripts/setup-mac.sh` and `scripts/run-mac.sh`, both safe to run twice.
 
 ## Resume commands
 

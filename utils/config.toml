@@ -50,3 +50,10 @@ battlepass = "https://calendar.google.com/calendar/ical/7dad99419c9ee8c8d7982ff9
 
 [login]
 allow-google-login = "False"
+
+[levels]
+# FALLBACK level generator (Breakers Revived Mac addition).
+# When a level has no captured data in res/wex/api/game/v2/level_data, build estimated rooms and rewards from the
+# LevelInfo datatable and room_generator so progress does not stop. Captured data always takes priority.
+# Set to "False" to restore the upstream single placeholder room.
+fallback-generator = "True"

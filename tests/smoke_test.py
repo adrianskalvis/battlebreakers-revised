@@ -147,7 +147,10 @@ def main() -> int:
     # Send the current revision, like the client does, so the server returns deltas (docs use rvn=29643).
     levels_rvn = lv.get("profileRevision", -1) if status == 200 else -1
     level_runs = []
-    for level_id in (init_doc["Request Body"]["levelId"], "Level.BlessedPlains.Map1.D1"):
+    # BurnyVolcano.Map1.D4 and BlessedPlains.Map1.D1 have captured data. AbandonedVillage.Map1.D1 has none, so it
+    # exercises the [levels] fallback-generator path (on by default).
+    fallback_level = "Level.AbandonedVillage.Map1.D1"
+    for level_id in (init_doc["Request Body"]["levelId"], "Level.BlessedPlains.Map1.D1", fallback_level):
         body = copy.deepcopy(init_doc["Request Body"])
         body["levelId"] = level_id
         # The docs hero ids belong to the capture account. Swap in heroes owned by the new account.
@@ -167,11 +170,20 @@ def main() -> int:
         added = [c for c in resp["profileChanges"] if c.get("changeType") == "itemAdded"
                  and c["item"]["templateId"] == "Level:InProgress"]
         check(f"InitializeLevel {level_id} adds Level:InProgress", len(added) == 1, str(resp["profileChanges"])[:300])
+        if added:
+            is_fallback = added[0]["item"]["attributes"].get("debug_fallback")
+            check(f"InitializeLevel {level_id} debug_fallback={level_id == fallback_level}",
+                  bool(is_fallback) == (level_id == fallback_level), str(added[0]["item"]["attributes"]))
         notes = [n for n in resp.get("notifications", []) if n.get("type") == "WExpLevelCreated"]
         exp_level = expected["notifications"][0]["level"]
         level = notes[0]["level"] if notes else {}
         check(f"InitializeLevel {level_id} WExpLevelCreated with rooms", bool(notes) and len(level.get("rooms", [])) > 0,
               str(notes)[:300])
+        if level_id == fallback_level:
+            info = json.loads((ROOT / "res/battle-breakers-data/WorldExplorers/Content/World/Datatables/LevelInfo.json")
+                              .read_text(encoding="utf-8"))[0]["Rows"][level_id]
+            check(f"InitializeLevel {level_id} fallback builds NumExpectedRooms={info['NumExpectedRooms']} rooms",
+                  len(level.get("rooms", [])) == info["NumExpectedRooms"], f"got {len(level.get('rooms', []))}")
         if level.get("rooms"):
             exp_room, room = exp_level["rooms"][0], level["rooms"][0]
             check(f"InitializeLevel {level_id} room keys match docs", not missing_keys(exp_room, room),

@@ -1150,6 +1150,58 @@ async def room_generator(level_id: str, level_info: dict) -> list:
     return [room]
 
 
+# ---------------------------------------------------------------------------------------------------------------------
+# FALLBACK LEVEL GENERATOR (Breakers Revived Mac addition, not upstream behaviour)
+# Used only when no captured level data exists in res/wex/api/game/v2/level_data and
+# [levels] fallback-generator = "True" in utils/config.toml. Captured data always takes priority.
+# Rooms and rewards are estimates built from the LevelInfo datatable row so players can keep progressing.
+# ---------------------------------------------------------------------------------------------------------------------
+def fallback_generator_enabled(config: Any) -> bool:
+    """
+    Reads the [levels] fallback-generator flag from the Sanic config, defaulting to on
+    :param config: The app config
+    :return: True when the fallback level generator is enabled
+    """
+    return str(config.get("LEVELS", {}).get("FALLBACK-GENERATOR", "True")).lower() == "true"
+
+
+async def fallback_level_generator(level_id: str, level_info: dict) -> tuple[list, int]:
+    """
+    FALLBACK: generates estimated rooms for a level without captured data
+    One room per LevelInfo NumExpectedRooms, each made by the existing room_generator, with gold and account XP loot
+    scaled by BaseWorldLevel. Battle pass XP is 150 per EventTier (the captured BurnyVolcano.Map1.D4 run had 450 at
+    EventTier 3).
+    :param level_id: The level id to generate the rooms for
+    :param level_info: The level info from the LevelInfo datatable
+    :return: The generated rooms, and the potential battle pass xp
+    """
+    sanic.log.logger.warning(f"FALLBACK level generator used for {level_id}: no captured level data")
+    rooms_count = max(int(level_info.get("NumExpectedRooms", 1) or 1), 1)
+    base_world_level = max(int(level_info.get("BaseWorldLevel", 1) or 1), 1)
+    rooms = []
+    for depth in range(1, rooms_count + 1):
+        room = (await room_generator(level_id, level_info))[0]
+        room["depth"] = depth
+        room["occupants"] = [
+            {"isFriendly": False, "killXp": 0, "lootTemplateId": "Currency:Gold",
+             "lootQuantity": 150 + 10 * base_world_level},
+            {"isFriendly": False, "killXp": 0, "lootTemplateId": "StandIn:AccountXp",
+             "lootQuantity": 10 + base_world_level},
+        ]
+        rooms.append(room)
+    potential_battlepass_xp = 150 * max(int(level_info.get("EventTier", 1) or 1), 1)
+    return rooms, potential_battlepass_xp
+
+
+async def fallback_completion_reward(level_info: dict) -> tuple[str, int]:
+    """
+    FALLBACK: estimated completion reward for a generated level when its LevelInfo loot tier groups yield nothing
+    :param level_info: The level info from the LevelInfo datatable
+    :return: The item template id and quantity to grant
+    """
+    return "Currency:Gold", 100 * max(int(level_info.get("BaseWorldLevel", 1) or 1), 1)
+
+
 @alru_cache(maxsize=256)
 async def load_character_data(character_id: str) -> dict:
     """

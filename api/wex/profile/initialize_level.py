@@ -17,7 +17,7 @@ from utils import types
 from utils.exceptions import errors
 from utils.enums import ProfileType
 from utils.utils import authorized as auth, load_datatable, format_time, room_generator, read_file_cached, \
-    process_choices, level_id_pattern, extract_version_info
+    process_choices, level_id_pattern, extract_version_info, fallback_generator_enabled, fallback_level_generator
 from utils.validation import MCPValidation, MCPQueryValidation
 
 from utils.sanic_gzip import Compress
@@ -183,6 +183,10 @@ async def initialize_level(request: types.BBProfileRequest, accountId: str,
                 room["occupants"].append(occupant)
             level_notification["level"]["rooms"].append(room)
             depth += 1
+    elif fallback_generator_enabled(request.app.config):
+        # FALLBACK (Breakers Revived Mac): no captured data, build estimated rooms from LevelInfo
+        level_notification["level"]["rooms"], level_notification["level"]["potentialBattlepassXp"] = \
+            await fallback_level_generator(level_id, level_info)
     else:
         level_notification["level"]["rooms"] = await room_generator(level_id, level_info)
     if level_id == "Level.Pvp.Sparring1.Map1.D1":
@@ -395,6 +399,7 @@ async def initialize_level(request: types.BBProfileRequest, accountId: str,
             "debug_name": level_id,
             "debug_battlepass_xp": level_notification["level"]["potentialBattlepassXp"],
             "debug_roomcount": len(level_notification["level"]["rooms"]),
+            "debug_fallback": level_data is None and fallback_generator_enabled(request.app.config),
         },
         "quantity": 1
     }, level_item_id, request.ctx.profile_id)

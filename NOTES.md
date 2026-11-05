@@ -33,3 +33,18 @@ Session start: Thu Nov  5 06:06:47 UTC 2026 (time limit 2 hours, stop new work a
 - Step 4 finding, not fixed: `LTG.Chest.Fire.VeryHigh`, `LTG.Chest.Fire.High` and `LTG.Completion.Light.Medium` are
   missing from the loot tier group data, so FinalizeLevel logs `Failed to find loot tier group` and skips that loot.
   This is an upstream data gap.
+- Step 5: upstream InitializeLevel already called `room_generator` for uncaptured levels, but it returned one room with
+  150 gold. The new FALLBACK path (`fallback_level_generator` in `utils/utils.py`) runs only when no captured file
+  exists for the level or any lower difficulty, and `[levels] fallback-generator = "True"` (default) in
+  `utils/config.toml`. Setting it to `"False"` restores the upstream single room.
+- Step 5 estimates (guesses, not captured data): one room per LevelInfo `NumExpectedRooms`, each from `room_generator`
+  (room `Room.Standard.FindExit.Easy.R01`, no enemies). Each room drops `150 + 10 * BaseWorldLevel` gold and
+  `10 + BaseWorldLevel` account XP. Battle pass XP is `150 * EventTier` (the captured BurnyVolcano.Map1.D4 run had 450
+  at EventTier 3). FinalizeLevel grants `100 * BaseWorldLevel` gold when the LevelInfo `CompletionLoot` tier group
+  yields nothing for a fallback level. First-clear unlocks (`WorldUnlock:Level`) work as upstream, so map progress
+  continues.
+- Step 5: the `Level:InProgress` item carries `debug_fallback: true|false`, beside the upstream `debug_*` attributes.
+  The server log prints `FALLBACK level generator used for <level>` each time.
+- Step 5 fix: `res/wex/api/game/v2/tier_groups/loot/LTG.Completion.Dark.Medium.json` had a `# TODO` comment, which is
+  invalid JSON, so FinalizeLevel returned HTTP 500 for every Dark level. The comment was removed. All other JSON files
+  under `res/wex` and `res/account` parse.

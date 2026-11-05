@@ -19,7 +19,8 @@ from utils import types
 from utils.exceptions import errors
 from utils.enums import ProfileType
 from utils.utils import authorized as auth, load_datatable, get_event_currency, get_path_from_template_id, \
-    reward_for_level, get_template_id_from_path, extract_version_info, process_choices
+    reward_for_level, get_template_id_from_path, extract_version_info, process_choices, \
+    fallback_generator_enabled, fallback_completion_reward
 from utils.validation import MCPValidation, MCPQueryValidation
 
 from utils.sanic_gzip import Compress
@@ -138,6 +139,18 @@ async def finalize_level(request: types.BBProfileRequest, accountId: str,
             level_complete_notification[0]["loot"].append({
                 "tierGroupName": "Level.Instance",
                 "items": items
+            })
+        elif level_item["attributes"].get("debug_fallback") and fallback_generator_enabled(request.app.config):
+            # FALLBACK (Breakers Revived Mac): generated level whose completion tier group yielded nothing
+            template_id, quantity = await fallback_completion_reward(level_info)
+            level_complete_notification[0]["loot"].append({
+                "tierGroupName": "Level.Instance",
+                "items": [{
+                    "itemType": template_id,
+                    "itemGuid": await request.ctx.profile.grant_item(template_id, quantity),
+                    "itemProfile": "profile0",
+                    "quantity": quantity
+                }]
             })
     # TODO: update account level + xp + add perk choice + notification
     # increase level

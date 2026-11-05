@@ -42,7 +42,7 @@
 				]
 			},
 			{
-				"itemType": "Gear:GD_Weapon_ElementalPistol_Nature", # TODO: random weapon
+				"itemType": "Gear:GD_Weapon_ElementalPistol_Nature",
 				"itemProfile": "profile0",
 				"quantity": 1
 			}
