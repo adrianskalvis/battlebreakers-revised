@@ -16,9 +16,11 @@
 7. `scripts/make-client-config.py` writes Engine.ini/Game.ini for Windows and 3 Android paths. Output matches the
    server's hotfix files. Extra per-service keys are unverified (NOTES.md).
 
+8. MAC.md written.
+
 ## Next step
 
-8. MAC.md: setup, running, ways to run the game on a Mac, what is missing upstream.
+9. Final push and summary.
 
 ## Resume commands
 

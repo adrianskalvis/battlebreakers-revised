@@ -91,3 +91,6 @@ appear nowhere in the repo, docs or Sinum:
 - `[OnlineSubsystemMcp.DataRouterServiceMcp]` `Protocol`, `Domain`
 
 All services share one host because the server routes by path prefix (`/account`, `/wex`, `/lightswitch`, ...).
+- Step 8: MAC.md written. CrossOver, Parallels, Android emulator and iOS-on-Apple-Silicon instructions come from
+  README.md and general tool behaviour. None was tested with a real client. The CrossOver bottle path, the Parallels
+  `bridge100` address and the macOS iPhone app container path are typical locations, unverified here.
