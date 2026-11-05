@@ -21,3 +21,15 @@ Session start: Thu Nov  5 06:06:47 UTC 2026 (time limit 2 hours, stop new work a
   only apply to `python main.py`. `[server] domain` is substituted into the cloud storage hotfix files
   (`res/wex/api/cloudstorage/system/DefaultEngine.ini` and `DefaultGame.ini`), so it should match the URL the client uses.
 - Step 3: Python 3.14 prints `SyntaxWarning` and `DeprecationWarning` lines from Sanic and asyncio at startup. They are harmless.
+- Step 4: `tests/smoke_test.py` runs against a live server with the standard library only. It parses the
+  `### Request Body` and `### Response Body` JSON blocks from the docs submodule pages for `oauth/token`,
+  `QueryProfile(profile0)`, `QueryProfile(levels)`, `InitializeLevel` and `FinalizeLevel`, replays the requests and
+  compares keys. The docs hero ids belong to the capture account, so the test swaps in heroes from the new account.
+  The test sends the current `rvn`, like the client, so the server returns deltas. 29/29 checks pass.
+- Step 4 fix 1: `utils/profile_system.py` serialised profiles with `profileType` only. Captured responses use
+  `profileId`. Smallest fix: emit both keys. `profileType` stays, so stored MongoDB documents keep working.
+- Step 4 fix 2: `api/wex/profile/finalize_level.py` appended a list to the notifications list, giving
+  `"notifications": [[{...}]]`. Captured response is `[{...}]`. Fix: pass the dict `level_complete_notification[0]`.
+- Step 4 finding, not fixed: `LTG.Chest.Fire.VeryHigh`, `LTG.Chest.Fire.High` and `LTG.Completion.Light.Medium` are
+  missing from the loot tier group data, so FinalizeLevel logs `Failed to find loot tier group` and skips that loot.
+  This is an upstream data gap.

@@ -455,6 +455,7 @@ class MCPProfile:
             "wipeNumber": self.wipeNumber,
             "accountId": self.accountId,
             "profileType": self.profile_type,
+            "profileId": self.profile_type,  # Breakers Revived Mac: captured responses use profileId (docs QueryProfile)
             "version": self.version,
             "items": self.items,
             "stats": self.stats,

@@ -198,7 +198,7 @@ async def finalize_level(request: types.BBProfileRequest, accountId: str,
             "items": event_loot
         })
     # TODO: challenge bonus
-    await request.ctx.profile.add_notifications(level_complete_notification, ProfileType.LEVELS)
+    await request.ctx.profile.add_notifications(level_complete_notification[0], ProfileType.LEVELS)  # Breakers Revived Mac: docs show a flat list
     # event_currency = await get_template_id_from_path(
     #     (await process_choices(event_data[0]["Properties"]["EventCurrency"]))["AssetPathName"])
     # element = await process_choices(["Nature", "Fire", "Water", "Dark", "Light", "Gear"])
