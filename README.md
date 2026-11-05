@@ -19,6 +19,12 @@ of 2022.
 
 ## About This Project
 
+> **Credit:** This server was written by **Alexander Hanson ([dippyshere](https://github.com/dippyshere))** and the
+> Breakers Revived contributors. This repository imports the upstream
+> [Breakers-Revived/battle-breakers-private-server](https://github.com/Breakers-Revived/battle-breakers-private-server)
+> `development` branch with its full history, plus small changes for running on macOS (see [MAC.md](MAC.md),
+> [NOTES.md](NOTES.md) and [HANDOFF.md](HANDOFF.md)). The [LICENSE](LICENSE) (Breakers Revived License) is unchanged.
+
 This project is a **complete reimplementation** of every Epic Games backend service required to run and play the game
 (AKA: Private Server, Server Emulator, Game Server, etc.). It is designed to be a complete standalone replacement for
 the original game servers, in addition to all other services the game contacts, allowing the game to be played as it was
