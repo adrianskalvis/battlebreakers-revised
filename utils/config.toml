@@ -9,7 +9,7 @@ KEEP_ALIVE_TIMEOUT = 300
 [server]
 host = "0.0.0.0"
 port = 8080
-domain = "http://192.168.0.45:8080"
+domain = "http://127.0.0.1:8000"  # Breakers Revived Mac: matches scripts/run-mac.sh; use your LAN URL for other devices
 
 [content]
 # The file path location to serve cooked game PAKs/built chunks from

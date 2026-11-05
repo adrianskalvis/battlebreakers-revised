@@ -48,3 +48,13 @@ Session start: Thu Nov  5 06:06:47 UTC 2026 (time limit 2 hours, stop new work a
 - Step 5 fix: `res/wex/api/game/v2/tier_groups/loot/LTG.Completion.Dark.Medium.json` had a `# TODO` comment, which is
   invalid JSON, so FinalizeLevel returned HTTP 500 for every Dark level. The comment was removed. All other JSON files
   under `res/wex` and `res/account` parse.
+- Step 6: `scripts/setup-mac.sh` installs Homebrew (non-interactive official installer) only when `brew` is missing,
+  installs `uv` with Homebrew only when missing, taps `mongodb/brew` and installs `mongodb-community` only when
+  missing, starts the brew service only when it is not `started`, runs `git submodule update --init` and `uv sync`,
+  and creates the RSA key pair only when the files are missing. Tested twice on Linux with a fake `brew` shim: run 1
+  installs and starts, run 2 skips both, both exit 0. Not run on a real Mac in this session.
+- Step 6: `scripts/run-mac.sh` starts MongoDB if needed, then `exec uv run sanic main:app --host 127.0.0.1 --port 8000`
+  (`HOST`/`PORT` override). If the port is already listening it prints a message and exits 0. Tested twice here.
+- Step 6: `[server] domain` default changed from upstream `http://192.168.0.45:8080` (the upstream author's LAN address)
+  to `http://127.0.0.1:8000`, to match `run-mac.sh`. The cloud storage hotfix files send this value to the client.
+  For a client on another device, set it to the Mac's LAN URL and run `HOST=0.0.0.0 scripts/run-mac.sh`.

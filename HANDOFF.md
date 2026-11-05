@@ -11,11 +11,26 @@
 
 5. FALLBACK level generator behind `[levels] fallback-generator = "True"` in `utils/config.toml`. Smoke tests: 42/42.
 
+6. `scripts/setup-mac.sh` and `scripts/run-mac.sh`, both tested twice (setup with a fake brew shim).
+
 ## Next step
 
-6. `scripts/setup-mac.sh` and `scripts/run-mac.sh`, both safe to run twice.
+7. `scripts/make-client-config.py` writing Engine.ini and Game.ini for Windows and Android paths.
 
 ## Resume commands
+
+On a Mac:
+
+```bash
+git clone --recurse-submodules -b claude/wizardly-volta-ifbm7m https://github.com/adrianskalvis/battlebreakers-revised.git
+cd battlebreakers-revised
+scripts/setup-mac.sh
+scripts/run-mac.sh
+# second terminal:
+uv run python tests/smoke_test.py
+```
+
+Manual (any OS):
 
 ```bash
 git clone --recurse-submodules -b claude/wizardly-volta-ifbm7m https://github.com/adrianskalvis/battlebreakers-revised.git
