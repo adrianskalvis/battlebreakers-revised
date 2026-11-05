@@ -58,3 +58,36 @@ Session start: Thu Nov  5 06:06:47 UTC 2026 (time limit 2 hours, stop new work a
 - Step 6: `[server] domain` default changed from upstream `http://192.168.0.45:8080` (the upstream author's LAN address)
   to `http://127.0.0.1:8000`, to match `run-mac.sh`. The cloud storage hotfix files send this value to the client.
   For a client on another device, set it to the Mac's LAN URL and run `HOST=0.0.0.0 scripts/run-mac.sh`.
+- Step 7: `scripts/make-client-config.py <url>` copies `res/wex/api/cloudstorage/system/DefaultEngine.ini` and
+  `DefaultGame.ini` and substitutes `{0}` exactly like `api/wex/cloud_storage.py` (host:port in Engine.ini, full URL in
+  Game.ini). It writes both files for the Windows path and the three Android paths from README.md, and prints `adb`
+  commands. With `--no-unverified`, the output matched the server's served hotfix files byte for byte (checked with
+  curl against `/wex/api/cloudstorage/system/<uniqueFilename>`). No game client was available, so no client has read
+  these files in this session.
+- Step 7 key sources: `Breakers-Revived/Sinum-BattleBreakers` (both branches) and `Breakers-Revived/AndroidPatcherCLI`
+  hold no ini keys. Sinum rewrites `*.ol.epicgames.com` URLs in native code. The docs submodule only lists the hotfix
+  file names. So the repo's hotfix templates are the only confirmed source.
+
+## Unverified ini keys
+
+Confirmed (present in `res/wex/api/cloudstorage/system/*.ini`): `[OnlineSubsystemMcp.BaseServiceMcp]`,
+`[OnlineSubsystemMcp.GameServiceMcp]`, `[OnlineSubsystemMcp.AccountManagement]`, `[OnlineSubsystemMcp.AccountServiceMcp]`
+(`Protocol`, `Domain`), `[OnlineSubsystemMcp.AccountServiceMcp Prod]` and `[... GameDev]` (`RedirectUrl`),
+`[OnlineSubsystemMcp.OnlineIdentityMcp]` URLs, and Game.ini `[/Script/WorldExplorers.WexpMcpAccount]`
+`WebUpgradeEpicAccountUrl`. These are confirmed as what the server sends; whether a client honours them from a local
+Engine.ini before the first hotfix is also unverified.
+
+Unverified (appended by default, removed with `--no-unverified`). Names follow the UE4 OnlineSubsystemMcp layout and
+appear nowhere in the repo, docs or Sinum:
+
+- `[OnlineSubsystemMcp.LightswitchServiceMcp]` `Protocol`, `Domain`
+- `[OnlineSubsystemMcp.FriendServiceMcp]` `Protocol`, `Domain`
+- `[OnlineSubsystemMcp.PersonaServiceMcp]` `Protocol`, `Domain`
+- `[OnlineSubsystemMcp.PresenceServiceMcp]` `Protocol`, `Domain`
+- `[OnlineSubsystemMcp.EntitlementsServiceMcp]` `Protocol`, `Domain`
+- `[OnlineSubsystemMcp.CatalogServiceMcp]` `Protocol`, `Domain`
+- `[OnlineSubsystemMcp.EulaTrackingServiceMcp]` `Protocol`, `Domain`
+- `[OnlineSubsystemMcp.PriceEngineServiceMcp]` `Protocol`, `Domain`
+- `[OnlineSubsystemMcp.DataRouterServiceMcp]` `Protocol`, `Domain`
+
+All services share one host because the server routes by path prefix (`/account`, `/wex`, `/lightswitch`, ...).

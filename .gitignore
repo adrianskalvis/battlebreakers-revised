@@ -252,3 +252,6 @@ fabric.properties
 
 /.idea/copilot*
 /.idea/csv-editor.xml
+
+# Breakers Revived Mac: output of scripts/make-client-config.py
+/client-config/
