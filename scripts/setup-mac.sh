@@ -48,6 +48,10 @@ fi
 if ! brew list --formula mongodb-community >/dev/null 2>&1; then
   say "Installing mongodb-community"
   brew tap mongodb/brew
+  # Homebrew 6 refuses formulae from third-party taps until trusted. Trust only this one formula, not the whole tap.
+  if brew commands --quiet 2>/dev/null | grep -qx trust; then
+    brew trust --formula mongodb/brew/mongodb-community
+  fi
   brew install mongodb-community
 else
   say "mongodb-community already installed"
