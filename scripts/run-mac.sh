@@ -8,6 +8,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 HOST="${HOST:-127.0.0.1}"
 PORT="${PORT:-8000}"
+# Same Python as setup-mac.sh; without this, uv run would rebuild the venv on the 3.14 pin.
+export UV_PYTHON="${UV_PYTHON:-3.12}"
 
 if ! command -v brew >/dev/null 2>&1; then
   for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
@@ -28,8 +30,15 @@ if command -v brew >/dev/null 2>&1 && brew list --formula mongodb-community >/de
 fi
 
 if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
-  echo "Port $PORT is already in use. The server is probably running: http://$HOST:$PORT"
-  exit 0
+  if curl -fsS --max-time 3 "http://127.0.0.1:$PORT/lightswitch/api/version" 2>/dev/null | grep -q '"lightswitch"'; then
+    echo "Breakers Revived is already running: http://$HOST:$PORT"
+    exit 0
+  fi
+  echo "Port $PORT is used by another program. Nothing was stopped:" >&2
+  lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >&2 || true
+  echo "Use a free port: PORT=8010 scripts/run-mac.sh" >&2
+  echo "Then set [server] domain = \"http://127.0.0.1:8010\" in utils/config.toml to match." >&2
+  exit 1
 fi
 
 echo "Starting Breakers Revived on http://$HOST:$PORT (Ctrl+C to stop)"

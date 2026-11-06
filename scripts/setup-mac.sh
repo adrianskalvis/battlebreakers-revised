@@ -8,6 +8,10 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
+# Python 3.12 has prebuilt macOS wheels for every locked dependency. Under the 3.14 pin in .python-version,
+# faust-cchardet has no macOS wheel and needs a compiler. Override with UV_PYTHON=3.14 if wanted.
+export UV_PYTHON="${UV_PYTHON:-3.12}"
+
 say() { printf '\n==> %s\n' "$*"; }
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
@@ -21,7 +25,9 @@ if ! command -v brew >/dev/null 2>&1; then
   done
 fi
 if ! command -v brew >/dev/null 2>&1; then
-  say "Installing Homebrew"
+  say "Installing Homebrew (asks for your Mac password once)"
+  # In NONINTERACTIVE mode the installer cannot ask for the sudo password itself, so cache it here first.
+  sudo -v
   NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
     [[ -x "$candidate" ]] && eval "$("$candidate" shellenv)" && break

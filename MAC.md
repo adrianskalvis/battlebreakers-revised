@@ -7,6 +7,17 @@ Decisions and unverified items are in [NOTES.md](NOTES.md).
 
 This repo does not include or download any game client, APK, IPA or PAK file. You need your own copy of the game.
 
+## Quick start
+
+Paste into Terminal once:
+
+```bash
+git clone --recurse-submodules -b claude/wizardly-volta-ifbm7m https://github.com/adrianskalvis/battlebreakers-revised.git ~/battlebreakers-revised && open ~/battlebreakers-revised/Start-Battle-Breakers.command
+```
+
+After that, double-click `Start-Battle-Breakers.command` in the `battlebreakers-revised` folder to start the server.
+It runs setup (skipping finished steps), then the server, in its own Terminal window.
+
 ## 1. Setup
 
 ```bash
@@ -21,7 +32,8 @@ scripts/setup-mac.sh
 2. Installs `uv` with Homebrew if it is missing.
 3. Taps `mongodb/brew`, installs `mongodb-community` and runs `brew services start mongodb-community`.
 4. Runs `git submodule update --init` for `docs` and `res/battle-breakers-data`.
-5. Runs `uv sync`, which also installs Python 3.14 (pinned in `.python-version`).
+5. Runs `uv sync` with Python 3.12 (`UV_PYTHON=3.12`), because every dependency has a prebuilt macOS wheel for
+   3.12. Under the 3.14 pin in `.python-version`, `faust-cchardet` would need compiling.
 6. Creates `utils/crypto/bb_private_key.pem` and `bb_public_key.pem`. The server exits at startup without them.
 
 Run it again at any time. A second run changes nothing.
@@ -32,8 +44,9 @@ Run it again at any time. A second run changes nothing.
 scripts/run-mac.sh
 ```
 
-The server listens on `http://127.0.0.1:8000`. Stop it with Ctrl+C. If the port is already in use, the script says so
-and exits.
+The server listens on `http://127.0.0.1:8000`. Stop it with Ctrl+C. If Breakers Revived already runs on the port,
+the script says so and exits 0. If another program holds the port, the script lists it, stops nothing, and exits 1;
+then use `PORT=8010 scripts/run-mac.sh` and set `[server] domain` in `utils/config.toml` to the same port.
 
 For a client on another device (VM, emulator, phone), listen on all interfaces:
 

@@ -98,3 +98,16 @@ All services share one host because the server routes by path prefix (`/account`
   (`debug_roomcount: 1`) and the two fallback checks failed as expected (40/42). Back on `"True"`: 42/42.
 
 Session end of work: Thu Nov  5 06:21 UTC 2026 (about 15 minutes used of the 2 hour limit).
+
+## Mac follow-up (2026-11-06)
+
+- `setup-mac.sh` and `run-mac.sh` now export `UV_PYTHON=3.12`. Every locked dependency has a macOS arm64 wheel for
+  3.12. Under the 3.14 pin, `faust-cchardet` 2.1.19 has no macOS wheel and would need compiling. `.python-version`
+  is unchanged, so upstream and Linux keep 3.14.
+- `setup-mac.sh` runs `sudo -v` before the Homebrew installer. In `NONINTERACTIVE` mode the installer cannot ask for
+  the password itself and fails without cached sudo.
+- `run-mac.sh` now checks `/lightswitch/api/version` when the port is taken. Breakers Revived on the port: exit 0.
+  Another program on the port: it lists the program, stops nothing, and exits 1.
+- `Start-Battle-Breakers.command` runs setup then the server; double-click it in Finder.
+- Tested on Linux with a fake `brew` and MongoDB 8.3.7 (conda-forge build): launcher start, smoke tests 42/42 on
+  Python 3.12.3, second run exits 0, port held by `python3 -m http.server` exits 1 and leaves it running.
